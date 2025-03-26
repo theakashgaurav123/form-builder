@@ -9,6 +9,8 @@ interface FormCanvasProps {
   onRemoveElement: (id: string) => void;
   onMoveElement: (dragIndex: number, hoverIndex: number) => void;
   onUpdateElement: (id: string, updates: Partial<FormElement>) => void;
+  onCopyElement: (element: FormElement) => void;
+  onPasteElement: (index: number) => void;
 }
 
 export function FormCanvas({
@@ -16,6 +18,8 @@ export function FormCanvas({
   onRemoveElement,
   onMoveElement,
   onUpdateElement,
+  onCopyElement,
+  onPasteElement,
 }: FormCanvasProps) {
   const [{ isOver }, drop] = useDrop(() => ({
     accept: ["FORM_ELEMENT", "DRAGGABLE_ELEMENT"],
@@ -56,6 +60,8 @@ export function FormCanvas({
               onRemove={onRemoveElement}
               onMove={onMoveElement}
               onUpdate={onUpdateElement}
+              onCopy={onCopyElement}
+              onPaste={() => onPasteElement(index)}
             />
           ))}
         </div>

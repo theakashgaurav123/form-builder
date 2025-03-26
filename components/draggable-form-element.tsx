@@ -1,12 +1,12 @@
 "use client"
 
-import { useRef } from "react"
+import { useRef, useEffect } from "react"
 import { useDrag, useDrop } from "react-dnd"
 import type { FormElement } from "@/lib/types"
 import { FormElementRenderer } from "@/components/form-element-renderer"
 import { FormElementEditor } from "@/components/form-element-editor"
 import { Button } from "@/components/ui/button"
-import { Trash2, GripVertical, Settings } from "lucide-react"
+import { Trash2, GripVertical, Settings, Copy, Clipboard } from "lucide-react"
 import { useState } from "react"
 
 interface DraggableFormElementProps {
@@ -16,6 +16,8 @@ interface DraggableFormElementProps {
   onRemove: (id: string) => void
   onMove: (dragIndex: number, hoverIndex: number) => void
   onUpdate: (id: string, updates: Partial<FormElement>) => void
+  onCopy: (element: FormElement) => void
+  onPaste: () => void
 }
 
 interface DragItem {
@@ -24,7 +26,7 @@ interface DragItem {
   type: string
 }
 
-export function DraggableFormElement({ id, index, element, onRemove, onMove, onUpdate }: DraggableFormElementProps) {
+export function DraggableFormElement({ id, index, element, onRemove, onMove, onUpdate, onCopy, onPaste }: DraggableFormElementProps) {
   const [showEditor, setShowEditor] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
 
@@ -96,6 +98,23 @@ export function DraggableFormElement({ id, index, element, onRemove, onMove, onU
 
   drag(drop(ref))
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.target instanceof HTMLElement && e.target.isContentEditable) return;
+      
+      if (e.ctrlKey || e.metaKey) { // Support both Windows/Linux and Mac
+        if (e.key === 'c') {
+          onCopy(element);
+        } else if (e.key === 'v') {
+          onPaste();
+        }
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [element, onCopy, onPaste]);
+
   return (
     <div
       ref={preview}
@@ -110,6 +129,24 @@ export function DraggableFormElement({ id, index, element, onRemove, onMove, onU
           <span className="text-sm font-medium">{element.props.label}</span>
         </div>
         <div className="flex items-center gap-1">
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="h-8 w-8" 
+            onClick={() => onCopy(element)}
+            title="Copy"
+          >
+            <Copy className="h-4 w-4" />
+          </Button>
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="h-8 w-8" 
+            onClick={onPaste}
+            title="Paste"
+          >
+            <Clipboard className="h-4 w-4" />
+          </Button>
           <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setShowEditor(!showEditor)}>
             <Settings className="h-4 w-4" />
           </Button>

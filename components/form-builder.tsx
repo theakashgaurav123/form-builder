@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useCallback } from "react"
 import { DndProvider } from "react-dnd"
 import { HTML5Backend } from "react-dnd-html5-backend"
 import { Button } from "@/components/ui/button"
@@ -12,6 +12,7 @@ import type { FormElement } from "@/lib/types"
 export function FormBuilder() {
   const [formElements, setFormElements] = useState<FormElement[]>([])
   const [showPreview, setShowPreview] = useState(false)
+  const [copiedElement, setCopiedElement] = useState<FormElement | null>(null)
 
   const addFormElement = (element: FormElement) => {
     const newElement = {
@@ -35,6 +36,25 @@ export function FormBuilder() {
 
   const updateFormElement = (id: string, updates: Partial<FormElement>) => {
     setFormElements(formElements.map((element) => (element.id === id ? { ...element, ...updates } : element)))
+  }
+
+  const handleCopyElement = (element: FormElement) => {
+    setCopiedElement(element)
+  }
+
+  const handlePasteElement = (index: number) => {
+    if (!copiedElement) return
+
+    const newElement = {
+      ...copiedElement,
+      id: `${copiedElement.type}-${Date.now()}`, // Generate new ID for copied element
+    }
+
+    setFormElements(prevElements => {
+      const newElements = [...prevElements]
+      newElements.splice(index + 1, 0, newElement)
+      return newElements
+    })
   }
 
   return (
@@ -61,6 +81,8 @@ export function FormBuilder() {
                 onRemoveElement={removeFormElement}
                 onMoveElement={moveFormElement}
                 onUpdateElement={updateFormElement}
+                onCopyElement={handleCopyElement}
+                onPasteElement={handlePasteElement}
               />
             </div>
           </div>
