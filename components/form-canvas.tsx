@@ -41,7 +41,7 @@ export function FormCanvas({
       {formElements.length === 0 ? (
         <div className="h-full flex items-center justify-center">
           <p className="text-muted-foreground text-center">
-            Drag and drop form elements here
+            Drag and drop elements here
             <br />
           </p>
         </div>
